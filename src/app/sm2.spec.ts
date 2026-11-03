@@ -1,4 +1,4 @@
-import { INITIAL_STATE, schedule } from './sm2'
+import { INITIAL_STATE, isDue, previewIntervals, schedule } from './sm2'
 
 describe('schedule (SM-2)', () => {
   const now = new Date('2026-01-01T00:00:00Z')
@@ -47,5 +47,28 @@ describe('schedule (SM-2)', () => {
     const easy = schedule(schedule(schedule(INITIAL_STATE, 5, now), 5, now), 5, now)
     const hard = schedule(schedule(schedule(INITIAL_STATE, 3, now), 3, now), 3, now)
     expect(easy.interval).toBeGreaterThan(hard.interval)
+  })
+})
+
+describe('isDue', () => {
+  const now = new Date('2026-01-01T00:00:00Z')
+
+  it('is true when the due time has passed', () => {
+    expect(isDue(new Date('2025-12-31T00:00:00Z'), now)).toBe(true)
+    expect(isDue(now, now)).toBe(true)
+    expect(isDue(new Date('2026-01-02T00:00:00Z'), now)).toBe(false)
+  })
+})
+
+describe('previewIntervals', () => {
+  const now = new Date('2026-01-01T00:00:00Z')
+
+  it('returns an interval for every grade and matches schedule()', () => {
+    const preview = previewIntervals(INITIAL_STATE, now)
+    expect(Object.keys(preview).length).toBe(6)
+    expect(preview[5]).toBe(schedule(INITIAL_STATE, 5, now).interval)
+    // a failing grade relearns from 1 day; a passing first review is also 1 day
+    expect(preview[0]).toBe(1)
+    expect(preview[3]).toBe(1)
   })
 })

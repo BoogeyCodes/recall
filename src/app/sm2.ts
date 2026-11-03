@@ -62,3 +62,20 @@ export function schedule(state: SchedulingState, grade: Grade, now: Date = new D
     dueAt: new Date(now.getTime() + interval * DAY_MS),
   }
 }
+
+/** Whether a scheduled card is due for review at `now`. */
+export function isDue(dueAt: Date, now: Date = new Date()): boolean {
+  return dueAt.getTime() <= now.getTime()
+}
+
+/**
+ * The interval (in days) each grade would produce next, without committing the change — handy for
+ * labelling the answer buttons so the learner can see what "Again", "Good", "Easy" will do.
+ */
+export function previewIntervals(state: SchedulingState, now: Date = new Date()): Record<Grade, number> {
+  const out = {} as Record<Grade, number>
+  for (const grade of [0, 1, 2, 3, 4, 5] as Grade[]) {
+    out[grade] = schedule(state, grade, now).interval
+  }
+  return out
+}
